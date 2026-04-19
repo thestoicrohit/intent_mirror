@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Local runtime data (reset on each deploy)
+server/store.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Claude internal tooling
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
