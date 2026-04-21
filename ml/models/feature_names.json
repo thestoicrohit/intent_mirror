@@ -1,0 +1,23 @@
+[
+  "days_left",
+  "days_bucket",
+  "last_login_days",
+  "login_bucket",
+  "fd_amount_l",
+  "fd_amount_bin",
+  "fd_count",
+  "city_tier",
+  "age_enc",
+  "n_signals",
+  "churn_signal_count",
+  "upgrade_signal_count",
+  "anxiety_signal_count",
+  "has_early_withdrawal",
+  "has_no_login",
+  "has_competitor_browse",
+  "has_safety_check",
+  "has_support_ticket",
+  "has_rate_compare",
+  "has_mf_browse",
+  "has_stocks_search"
+]
