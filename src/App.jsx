@@ -1,6 +1,7 @@
 import { useState, createContext, useContext } from 'react'
 import { LABELS } from './i18n'
 import { DARK, LIGHT } from './theme'
+import LandingPage from './components/LandingPage'
 import Onboarding from './components/Onboarding'
 import MyMoney from './components/MyMoney'
 import IdentityCard from './components/IdentityCard'
@@ -20,6 +21,7 @@ const NAV = [
 
 export default function App() {
   const [wallet, setWallet]               = useState(() => getActiveWallet())
+  const [view, setView]                   = useState('landing')   // landing → app
   const [lang, setLang]                   = useState('EN')
   const [isDark, setIsDark]               = useState(true)
   const [activeSection, setActiveSection] = useState('money')
@@ -28,6 +30,17 @@ export default function App() {
 
   const t = LABELS[lang]
   const c = isDark ? DARK : LIGHT
+
+  /* ── Animated landing (the entrance) ────────────────── */
+  if (view === 'landing') {
+    return (
+      <LandingPage
+        onEnter={() => setView('app')}
+        isDark={isDark}
+        onToggleTheme={() => setIsDark(d => !d)}
+      />
+    )
+  }
 
   /* ── Not signed in → onboarding ─────────────────────── */
   if (!wallet) {
