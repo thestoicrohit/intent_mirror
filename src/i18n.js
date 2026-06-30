@@ -52,6 +52,19 @@ export const LABELS = {
       aboutToDoSub: 'Read from your recent behaviour — not just your balances.',
       suggestions: 'Suggestions for you',
       matchedTo: (p) => `Matched to your ${p} profile.`,
+      // Verification
+      verifiedNetWorth: 'Verified net worth',
+      ofTotal: (tot) => `of ${tot} total`,
+      toVerify: (amt) => `${amt} to verify`,
+      verifyHint: 'Verify a holding to count it toward your net worth.',
+      verify: 'Verify', proveOnChain: 'Prove on-chain', verifying: 'Verifying…', verified: 'Verified',
+      // Growth projector
+      growTitle: 'Grow — what if you invested?',
+      growSub: 'See how your money could multiply over time.',
+      amount: 'Amount (₹)', inAsset: 'in', couldBecome: 'could become',
+      multiplier: (x) => `${x}× your money`,
+      perYear: 'p.a.',
+      growDisclaimer: 'Illustrative growth at historical average returns — not a guarantee or advice.',
     },
 
     identity: {
@@ -120,6 +133,19 @@ export const LABELS = {
       aboutToDoSub: 'सिर्फ़ बैलेंस नहीं — आपके हालिया व्यवहार से पढ़ा गया।',
       suggestions: 'आपके लिए सुझाव',
       matchedTo: (p) => `आपके ${p} पर्सोना के अनुसार।`,
+      // Verification
+      verifiedNetWorth: 'सत्यापित कुल संपत्ति',
+      ofTotal: (tot) => `कुल ${tot} में से`,
+      toVerify: (amt) => `${amt} सत्यापित करना बाकी`,
+      verifyHint: 'किसी होल्डिंग को कुल संपत्ति में गिनने के लिए उसे सत्यापित करें।',
+      verify: 'सत्यापित करें', proveOnChain: 'ऑन-चेन साबित करें', verifying: 'सत्यापित हो रहा…', verified: 'सत्यापित',
+      // Growth projector
+      growTitle: 'बढ़ाएँ — अगर आप निवेश करें?',
+      growSub: 'देखें आपका पैसा समय के साथ कैसे बढ़ सकता है।',
+      amount: 'राशि (₹)', inAsset: 'में', couldBecome: 'बन सकता है',
+      multiplier: (x) => `आपके पैसे का ${x}×`,
+      perYear: 'प्रति वर्ष',
+      growDisclaimer: 'ऐतिहासिक औसत रिटर्न पर अनुमानित वृद्धि — कोई गारंटी या सलाह नहीं।',
     },
 
     identity: {

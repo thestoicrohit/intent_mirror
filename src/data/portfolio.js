@@ -19,6 +19,15 @@ export const ASSET_CLASSES = {
   'Fixed Deposit': { color: '#568F7C', icon: '🏦' },
 }
 
+// Illustrative historical-average annual returns, used only by the
+// "what if you invested?" growth projector. Not advice or a guarantee.
+export const EXPECTED_CAGR = {
+  'Fixed Deposit': 0.07,
+  'Mutual Fund':   0.12,
+  Stocks:          0.14,
+  Crypto:          0.20,
+}
+
 /** Base holdings. `value` is current ₹ value; `invested` is cost basis. */
 export const HOLDINGS = [
   { id:'eth',  class:'Crypto',        name:'Ethereum',         symbol:'ETH',  qty:1.42,   value:382000, invested:298000, change24h:+3.8 },
