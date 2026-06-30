@@ -156,7 +156,7 @@ intent-mirror/
 npm install
 
 # 2. Frontend (Vite dev server)
-npm run dev          # → http://localhost:5174
+npm run dev          # → http://localhost:5180
 
 # 3. Backend (issuer-mint + reads) — optional; app works without it
 npm run server       # → http://localhost:3001

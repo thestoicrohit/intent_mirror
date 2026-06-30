@@ -6,9 +6,7 @@
    layer — it reads intent and nudges YOU, the way the bank version
    nudged customers.
 
-   Runs fully client-side so the app is never blank. The backend
-   /api/ai/nudge endpoint can enrich these with an LLM-written message
-   when the server + ML service are up (see enrichWithAI below).
+   Runs fully client-side so the app is never blank.
 ═══════════════════════════════════════════════ */
 
 function inrL(v) {
@@ -77,24 +75,4 @@ export function generateSuggestions({ pf, persona, holdings, activity }, lang = 
   })
 
   return out.slice(0, 4)
-}
-
-/**
- * Optional LLM enrichment via the existing backend nudge endpoint.
- * Returns a single personalised message string, or null on failure.
- * The UI works without this — it's a progressive enhancement.
- */
-export async function enrichWithAI(profile) {
-  try {
-    const res = await fetch('/api/ai/nudge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: profile, channel: 'in_app', lang: 'en' }),
-    })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data.message || null
-  } catch {
-    return null
-  }
 }
