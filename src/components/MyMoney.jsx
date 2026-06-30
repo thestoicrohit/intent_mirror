@@ -7,6 +7,7 @@ import {
 } from '../data/portfolio'
 import { getCredential } from '../web3/credential'
 import { generateSuggestions } from '../suggestions'
+import { getPortfolio, verifyHolding as verifyHoldingApi } from '../familyApi'
 
 // Persona colours match the palette already used in the Wealth Hub.
 const PERSONA_META = {
@@ -30,23 +31,37 @@ export default function MyMoney({ wallet, onOpenIdentity }) {
   // ── Verification: only verified holdings count toward net worth ──────────
   // The FD is bank-linked, so it starts verified; the user proves the rest.
   const VKEY = 'im_verified:' + (wallet?.address || 'anon')
+  const [server, setServer]     = useState(null)   // backend portfolio (persona, suggestions, verified)
   const [verified, setVerified] = useState(() => {
     try { const r = localStorage.getItem(VKEY); return new Set(r ? JSON.parse(r) : ['fd']) }
     catch { return new Set(['fd']) }
   })
   const [verifying, setVerifying] = useState(null)
 
-  function verifyHolding(h) {
+  // Backend is the source of truth for verification + persona + suggestions.
+  // Falls back to local computation if the server is offline.
+  useEffect(() => {
+    let alive = true
+    getPortfolio(wallet?.address, lang).then(d => {
+      if (!alive || !d) return
+      setServer(d)
+      setVerified(new Set(d.verified))
+      try { localStorage.setItem(VKEY, JSON.stringify(d.verified)) } catch { /* ignore */ }
+    })
+    return () => { alive = false }
+  }, [wallet, lang])   // eslint-disable-line react-hooks/exhaustive-deps
+
+  function doVerify(h) {
     setVerifying(h.id)
-    // crypto proves via the wallet (on-chain); others "link" the account
-    setTimeout(() => {
-      setVerified(prev => {
-        const next = new Set(prev); next.add(h.id)
-        try { localStorage.setItem(VKEY, JSON.stringify([...next])) } catch { /* ignore */ }
-        return next
-      })
+    setVerified(prev => {            // optimistic update
+      const next = new Set(prev); next.add(h.id)
+      try { localStorage.setItem(VKEY, JSON.stringify([...next])) } catch { /* ignore */ }
+      return next
+    })
+    verifyHoldingApi(wallet?.address, h.id, lang).then(d => {
+      if (d) { setServer(d); setVerified(new Set(d.verified)) }
       setVerifying(null)
-    }, 850)
+    })
   }
 
   // simulate live crypto prices every 4s
@@ -63,8 +78,9 @@ export default function MyMoney({ wallet, onOpenIdentity }) {
   const verifiedList  = holdings.filter(h => verified.has(h.id))
   const vpf           = computePortfolio(verifiedList.length ? verifiedList : holdings.slice(0, 1))
   const pending       = pf.netWorth - vpf.netWorth
-  const persona       = deriveMoneyPersona(holdings)                          // behaviour uses all holdings
-  const suggestions   = generateSuggestions({ pf, persona, holdings, activity: ACTIVITY }, lang)
+  const clientPersona = deriveMoneyPersona(holdings)                          // behaviour uses all holdings
+  const persona       = server?.persona || clientPersona                     // backend-computed when available
+  const suggestions   = server?.suggestions || generateSuggestions({ pf, persona: clientPersona, holdings, activity: ACTIVITY }, lang)
   const pm            = PERSONA_META[persona.persona] || PERSONA_META.Protector
   const credential    = getCredential(wallet?.address)
   const allVerified   = pending <= 0
@@ -170,7 +186,7 @@ export default function MyMoney({ wallet, onOpenIdentity }) {
                         ✓ {t.money.verified}
                       </span>
                     ) : (
-                      <button onClick={() => verifyHolding(h)} disabled={busy} style={{
+                      <button onClick={() => doVerify(h)} disabled={busy} style={{
                         fontSize: 10.5, fontWeight: 700, cursor: busy ? 'wait' : 'pointer',
                         padding: '5px 9px', borderRadius: 7,
                         background: `${c.accent}1f`, border: `1px solid ${c.accent}66`, color: c.accent,

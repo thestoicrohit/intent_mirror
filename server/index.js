@@ -2,10 +2,15 @@
    Intent Mirror — Backend API
    ───────────────────────────────────────────────
    Focused, robust API for the B2C money copilot:
+     • My Money — portfolio, server-computed persona + AI suggestions,
+       and persisted holding verification (verified holdings gate net worth)
      • On-chain Intent Credential mint + read (Base Sepolia, viem)
      • Family / Kids "Money Quest" — missions, XP, levels, streaks,
        savings goals, allowance (persisted)
      • Health
+
+   The portfolio + suggestion logic is shared with the frontend via the
+   src/ modules below — single source of truth, no duplication.
 
    Design rules:
      • Every route is wrapped so a bad request never crashes the server.
@@ -23,6 +28,12 @@ import { dirname, join } from 'path'
 import { createWalletClient, createPublicClient, http, isAddress } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
+// Shared logic — same modules the frontend uses (single source of truth)
+import {
+  HOLDINGS, ACTIVITY, EXPECTED_CAGR,
+  computePortfolio, deriveMoneyPersona, deriveSignals,
+} from '../src/data/portfolio.js'
+import { generateSuggestions } from '../src/suggestions.js'
 
 const __dirname   = dirname(fileURLToPath(import.meta.url))
 const PORT        = process.env.PORT || 3001
@@ -31,13 +42,13 @@ const STORE_FILE  = join(__dirname, 'store.json')
 /* ══════════════════════════════════════════
    PERSISTENCE  (families keyed by wallet address)
 ══════════════════════════════════════════ */
-const DEFAULT_STORE = { families: {} }
+const DEFAULT_STORE = { families: {}, portfolios: {} }
 
 function loadStore() {
   if (existsSync(STORE_FILE)) {
     try {
       const data = JSON.parse(readFileSync(STORE_FILE, 'utf8'))
-      return { ...DEFAULT_STORE, ...data, families: data.families || {} }
+      return { ...DEFAULT_STORE, ...data, families: data.families || {}, portfolios: data.portfolios || {} }
     } catch (e) {
       console.warn(`⚠️  store.json unreadable (${e.message}) — starting fresh`)
     }
@@ -137,6 +148,44 @@ function bumpStreak(fam) {
 }
 
 /* ══════════════════════════════════════════
+   MY MONEY  (portfolio, verification, persona, suggestions)
+   Verified holdings gate net worth. Logic reused from src/.
+══════════════════════════════════════════ */
+const HOLDING_IDS = new Set(HOLDINGS.map(h => h.id))
+
+function getPortfolioRec(address) {
+  const key = address.toLowerCase()
+  if (!store.portfolios[key]) {
+    store.portfolios[key] = { verified: ['fd'] }   // FD is bank-linked → auto-verified
+    saveStore()
+  }
+  return store.portfolios[key]
+}
+
+function buildPortfolio(address, lang = 'EN') {
+  const rec = getPortfolioRec(address)
+  const verified = new Set(rec.verified)
+  const verifiedList = HOLDINGS.filter(h => verified.has(h.id))
+  const pf  = computePortfolio(HOLDINGS)
+  const vpf = computePortfolio(verifiedList.length ? verifiedList : HOLDINGS.slice(0, 1))
+  const persona = deriveMoneyPersona(HOLDINGS)
+  return {
+    holdings:        HOLDINGS.map(h => ({ ...h, verified: verified.has(h.id) })),
+    verified:        [...verified],
+    activity:        ACTIVITY,
+    verifiedNetWorth: vpf.netWorth,
+    totalNetWorth:   pf.netWorth,
+    pending:         pf.netWorth - vpf.netWorth,
+    pnl:             vpf.pnl,
+    pnlPct:          vpf.pnlPct,
+    allocation:      vpf.allocation,
+    persona,
+    signals:         deriveSignals(HOLDINGS),
+    suggestions:     generateSuggestions({ pf, persona, holdings: HOLDINGS, activity: ACTIVITY }, lang),
+  }
+}
+
+/* ══════════════════════════════════════════
    ON-CHAIN CREDENTIALS  (Base Sepolia, viem)
 ══════════════════════════════════════════ */
 const ISSUER_PK = process.env.ISSUER_PRIVATE_KEY || ''
@@ -198,6 +247,7 @@ app.get('/api/health', (_req, res) => {
     status: 'ok',
     version: '4.0.0',
     families: Object.keys(store.families).length,
+    portfolios: Object.keys(store.portfolios).length,
     onchain: ONCHAIN,
     issuer: issuerAccount?.address || null,
     uptime: Math.floor(process.uptime()),
@@ -282,6 +332,35 @@ app.post('/api/family/:address/save', wrap((req, res) => {
   res.json({ family: { ...fam, level: levelFor(fam.xp) }, saved: move })
 }))
 
+/* ── My Money: portfolio (server-computed, verified-gated) ── */
+app.get('/api/portfolio/:address', wrap((req, res) => {
+  const key = requireAddress(req, res); if (!key) return
+  res.json(buildPortfolio(key, req.query.lang === 'HI' ? 'HI' : 'EN'))
+}))
+
+// POST /api/portfolio/:address/verify — prove/verify a holding (persists)
+app.post('/api/portfolio/:address/verify', wrap((req, res) => {
+  const key = requireAddress(req, res); if (!key) return
+  const { holdingId } = req.body || {}
+  if (!HOLDING_IDS.has(holdingId)) return res.status(400).json({ error: 'unknown holdingId' })
+  const rec = getPortfolioRec(key)
+  if (!rec.verified.includes(holdingId)) { rec.verified.push(holdingId); saveStore() }
+  res.json(buildPortfolio(key, req.query.lang === 'HI' ? 'HI' : 'EN'))
+}))
+
+// GET /api/projection?amount=&class=&years= — compound-growth "what if?"
+app.get('/api/projection', wrap((req, res) => {
+  const amount = Number(req.query.amount)
+  const years  = Number(req.query.years)
+  const klass  = req.query.class
+  if (!Number.isFinite(amount) || amount <= 0)            return res.status(400).json({ error: 'amount must be positive' })
+  if (!Number.isFinite(years) || years <= 0 || years > 100) return res.status(400).json({ error: 'years must be 1–100' })
+  const cagr = EXPECTED_CAGR[klass]
+  if (cagr == null) return res.status(400).json({ error: 'unknown asset class' })
+  const projected = Math.round(amount * Math.pow(1 + cagr, years))
+  res.json({ amount, class: klass, years, cagr, projected, multiplier: Number((projected / amount).toFixed(1)) })
+}))
+
 /* ── On-chain credential: mint (issuer pays gas) ── */
 app.post('/api/credential/mint', wrap(async (req, res) => {
   const { address, profile } = req.body || {}
@@ -328,6 +407,9 @@ app.use((err, _req, res, _next) => {
 app.listen(PORT, () => {
   console.log(`\n  Intent Mirror API v4.0  →  http://localhost:${PORT}`)
   console.log(`  GET  /api/health`)
+  console.log(`  GET  /api/portfolio/:address`)
+  console.log(`  POST /api/portfolio/:address/verify`)
+  console.log(`  GET  /api/projection`)
   console.log(`  GET  /api/missions`)
   console.log(`  GET  /api/family/:address`)
   console.log(`  PUT  /api/family/:address`)

@@ -19,6 +19,10 @@ async function req(method, path, body) {
   }
 }
 
+// My Money — portfolio + verification (server is source of truth)
+export const getPortfolio   = (addr, lang = 'EN')        => req('GET',  `/portfolio/${addr}?lang=${lang}`)
+export const verifyHolding  = (addr, holdingId, lang='EN') => req('POST', `/portfolio/${addr}/verify?lang=${lang}`, { holdingId })
+
 export const getMissions   = ()              => req('GET',  '/missions')
 export const getFamily     = (addr)          => req('GET',  `/family/${addr}`)
 export const updateFamily  = (addr, patch)   => req('PUT',  `/family/${addr}`, patch)
