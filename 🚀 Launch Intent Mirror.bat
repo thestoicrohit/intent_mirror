@@ -1,4 +1,5 @@
 @echo off
+setlocal
 title Intent Mirror — Launcher
 color 0A
 
@@ -10,6 +11,34 @@ echo  ============================================
 echo.
 
 cd /d "%~dp0"
+
+where node >nul 2>nul
+if errorlevel 1 (
+    echo  ERROR: Node.js was not found on your PATH.
+    echo  Install it from https://nodejs.org/ and try again.
+    echo.
+    pause
+    exit /b 1
+)
+
+if not exist "node_modules" (
+    echo  [setup] node_modules not found — running npm install...
+    call npm install
+    if errorlevel 1 (
+        echo  ERROR: npm install failed.
+        pause
+        exit /b 1
+    )
+    echo.
+)
+
+if not exist ".env" (
+    if exist ".env.example" (
+        echo  [setup] .env not found — creating one from .env.example...
+        copy /y ".env.example" ".env" >nul
+        echo.
+    )
+)
 
 echo  [1/2] Starting API server on port 3001...
 start "Intent Mirror - API Server" cmd /k "node server/index.js"
