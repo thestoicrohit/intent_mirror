@@ -9,6 +9,7 @@ import WealthHub from './components/WealthHub'
 import FamilyMode from './components/FamilyMode'
 import CryptoArena from './components/CryptoArena'
 import { getActiveWallet, signOut, shortAddress } from './web3/wallet'
+import { getUser } from './web3/auth'
 
 const GUEST = { email: 'guest', address: '0x0000000000000000000000000000000000000000', guest: true }
 
@@ -151,7 +152,8 @@ export default function App() {
                   borderRadius: 12, padding: 12, zIndex: 200,
                   boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
                 }}>
-                  <div style={{ fontSize: 11, color: c.textDim }}>{wallet.email}</div>
+                  <div style={{ fontSize: 14, fontWeight: 800 }}>{getUser(wallet.email)?.name || 'Your account'}</div>
+                    <div style={{ fontSize: 11, color: c.textDim }}>{wallet.email}</div>
                   <div style={{ fontSize: 12, fontFamily: 'monospace', marginTop: 2, wordBreak: 'break-all' }}>{wallet.address}</div>
                   <button onClick={() => { signOut(); setAccount(null); setActiveSection('money') }} style={{
                     marginTop: 12, width: '100%', background: 'transparent',
