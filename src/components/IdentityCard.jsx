@@ -23,7 +23,7 @@ function buildProfile() {
   }
 }
 
-export default function IdentityCard({ wallet }) {
+export default function IdentityCard({ wallet, onSignup }) {
   const { c, isDark, t } = useApp()
   const ti = t.identity
   const [credential, setCredential] = useState(() => getCredential(wallet?.address))
@@ -51,8 +51,8 @@ export default function IdentityCard({ wallet }) {
       <div style={{ ...card, display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{ width: 38, height: 38, borderRadius: '50%', background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})` }} />
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, color: c.textDim }}>{wallet?.email}</div>
-          <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'monospace' }}>{shortAddress(wallet?.address)}</div>
+          <div style={{ fontSize: 11, color: c.textDim }}>{wallet?.guest ? 'Browsing as guest' : wallet?.email}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, fontFamily: 'monospace' }}>{wallet?.guest ? 'No wallet yet — sign up to get one' : shortAddress(wallet?.address)}</div>
         </div>
         <div style={{
           fontSize: 10, fontWeight: 800, letterSpacing: 0.5, padding: '5px 10px', borderRadius: 6,
@@ -70,12 +70,12 @@ export default function IdentityCard({ wallet }) {
           <p style={{ fontSize: 13, color: c.textMuted, maxWidth: 460, margin: '8px auto 20px', lineHeight: 1.6 }}>
             {ti.mintBody}
           </p>
-          <button onClick={handleMint} disabled={minting} style={{
+          <button onClick={wallet?.guest ? onSignup : handleMint} disabled={minting} style={{
             background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`,
             border: 'none', borderRadius: 10, padding: '13px 26px',
             color: '#fff', fontSize: 14, fontWeight: 700, cursor: minting ? 'wait' : 'pointer',
           }}>
-            {minting ? ti.minting : ti.mintBtn}
+            {wallet?.guest ? 'Create a free account to mint →' : minting ? ti.minting : ti.mintBtn}
           </button>
         </div>
       ) : (

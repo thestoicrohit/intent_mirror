@@ -10,6 +10,8 @@ import FamilyMode from './components/FamilyMode'
 import CryptoArena from './components/CryptoArena'
 import { getActiveWallet, signOut, shortAddress } from './web3/wallet'
 
+const GUEST = { email: 'guest', address: '0x0000000000000000000000000000000000000000', guest: true }
+
 export const AppContext = createContext(null)
 export const useApp = () => useContext(AppContext)
 
@@ -22,7 +24,8 @@ const NAV = [
 ]
 
 export default function App() {
-  const [wallet, setWallet]               = useState(() => getActiveWallet())
+  const [account, setAccount]             = useState(() => getActiveWallet())
+  const [authMode, setAuthMode]           = useState(null)     // null | 'signup' | 'login' (shown on demand)
   const [view, setView]                   = useState('landing')   // landing → app
   const [lang, setLang]                   = useState('EN')
   const [isDark, setIsDark]               = useState(true)
@@ -30,6 +33,7 @@ export default function App() {
   const [activeTab, setActiveTab]         = useState('tabHarvest')   // legacy, kept for context shape
   const [menuOpen, setMenuOpen]           = useState(false)
 
+  const wallet = account || GUEST        // browsing without an account uses a local guest profile
   const t = LABELS[lang]
   const c = isDark ? DARK : LIGHT
 
@@ -44,13 +48,14 @@ export default function App() {
     )
   }
 
-  /* ── Not signed in → onboarding ─────────────────────── */
-  if (!wallet) {
+  /* ── Auth only when the visitor asks for it ─────────── */
+  if (authMode) {
     return (
       <Onboarding
-        c={c} isDark={isDark}
+        c={c} isDark={isDark} initialMode={authMode}
         onToggleTheme={() => setIsDark(d => !d)}
-        onComplete={(w) => setWallet(w)}
+        onBack={() => setAuthMode(null)}
+        onComplete={(w) => { setAccount(w); setAuthMode(null) }}
       />
     )
   }
@@ -117,35 +122,47 @@ export default function App() {
             {isDark ? '☀️' : '🌙'}
           </button>
 
+          {wallet.guest ? (
+            <>
+              <button onClick={() => setAuthMode('login')} style={ctrlBtn(c)}>Log in</button>
+              <button onClick={() => setAuthMode('signup')} style={{
+                background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, border: 'none', borderRadius: 7,
+                padding: '0 14px', height: 32, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}>Sign up free</button>
+            </>
+          ) : (
+            <>
           {/* wallet menu */}
-          <div style={{ position: 'relative' }}>
-            <button onClick={() => setMenuOpen(o => !o)} style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: c.card, border: `1px solid ${c.border}`,
-              borderRadius: 20, padding: '4px 10px 4px 4px', cursor: 'pointer',
-            }}>
-              <div style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})` }} />
-              <span style={{ fontSize: 11.5, fontWeight: 700, fontFamily: 'monospace', color: c.text }}>
-                {shortAddress(wallet.address)}
-              </span>
-            </button>
-            {menuOpen && (
-              <div style={{
-                position: 'absolute', right: 0, top: 40, minWidth: 220,
-                background: c.modalBg, border: `1px solid ${c.borderStrong}`,
-                borderRadius: 12, padding: 12, zIndex: 200,
-                boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setMenuOpen(o => !o)} style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: c.card, border: `1px solid ${c.border}`,
+                borderRadius: 20, padding: '4px 10px 4px 4px', cursor: 'pointer',
               }}>
-                <div style={{ fontSize: 11, color: c.textDim }}>{wallet.email}</div>
-                <div style={{ fontSize: 12, fontFamily: 'monospace', marginTop: 2, wordBreak: 'break-all' }}>{wallet.address}</div>
-                <button onClick={() => { signOut(); setWallet(null) }} style={{
-                  marginTop: 12, width: '100%', background: 'transparent',
-                  border: `1px solid ${c.border}`, borderRadius: 8, padding: '8px',
-                  color: c.danger, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
-                }}>{t.nav.signOut}</button>
-              </div>
-            )}
-          </div>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})` }} />
+                <span style={{ fontSize: 11.5, fontWeight: 700, fontFamily: 'monospace', color: c.text }}>
+                  {shortAddress(wallet.address)}
+                </span>
+              </button>
+              {menuOpen && (
+                <div style={{
+                  position: 'absolute', right: 0, top: 40, minWidth: 220,
+                  background: c.modalBg, border: `1px solid ${c.borderStrong}`,
+                  borderRadius: 12, padding: 12, zIndex: 200,
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.35)',
+                }}>
+                  <div style={{ fontSize: 11, color: c.textDim }}>{wallet.email}</div>
+                  <div style={{ fontSize: 12, fontFamily: 'monospace', marginTop: 2, wordBreak: 'break-all' }}>{wallet.address}</div>
+                  <button onClick={() => { signOut(); setAccount(null); setActiveSection('money') }} style={{
+                    marginTop: 12, width: '100%', background: 'transparent',
+                    border: `1px solid ${c.border}`, borderRadius: 8, padding: '8px',
+                    color: c.danger, fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                  }}>{t.nav.signOut}</button>
+                </div>
+              )}
+            </div>
+            </>
+          )}
         </header>
 
         {/* ── Content ────────────────────────────────────── */}
@@ -154,7 +171,7 @@ export default function App() {
           {activeSection === 'wealth'   && <WealthHub />}
           {activeSection === 'arena'    && <CryptoArena />}
           {activeSection === 'family'   && <FamilyMode wallet={wallet} />}
-          {activeSection === 'identity' && <IdentityCard wallet={wallet} />}
+          {activeSection === 'identity' && <IdentityCard wallet={wallet} onSignup={() => setAuthMode('signup')} />}
         </main>
       </div>
     </AppContext.Provider>

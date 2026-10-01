@@ -57,8 +57,8 @@ function OtpBoxes({ value, onChange, c, disabled }) {
   )
 }
 
-export default function Onboarding({ onComplete, c, isDark, onToggleTheme }) {
-  const [mode, setMode]       = useState('signup')   // signup | login | forgot | verify | newpass | creating | done
+export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initialMode = 'signup', onBack }) {
+  const [mode, setMode]       = useState(initialMode)   // signup | login | forgot | verify | newpass | creating | done
   const [purpose, setPurpose] = useState('signup')   // what the code is for: signup | reset
   const [form, setForm]       = useState({ name: '', email: '', password: '', confirm: '', agree: false })
   const [showPw, setShowPw]   = useState(false)
@@ -215,6 +215,13 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme }) {
         position: 'absolute', top: 20, right: 20, background: 'transparent', border: `1px solid ${c.border}`,
         borderRadius: 8, width: 36, height: 36, cursor: 'pointer', fontSize: 15,
       }}>{isDark ? '☀️' : '🌙'}</button>
+
+      {onBack && mode !== 'creating' && mode !== 'done' && (
+        <button onClick={onBack} style={{
+          position: 'absolute', top: 20, left: 20, background: 'transparent', border: `1px solid ${c.border}`,
+          borderRadius: 8, padding: '8px 14px', color: c.textMuted, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+        }}>← Keep exploring</button>
+      )}
 
       <div style={{ width: '100%', maxWidth: 440, position: 'relative' }}>
         {/* brand */}
