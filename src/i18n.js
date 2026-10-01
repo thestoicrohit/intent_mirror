@@ -7,7 +7,7 @@
 
 export const LABELS = {
   EN: {
-    nav: { money: 'My Money', wealth: 'Wealth Hub', identity: 'Identity', family: 'Family', signOut: 'Sign out' },
+    nav: { money: 'My Money', wealth: 'Wealth Hub', arena: 'Crypto Arena', identity: 'Identity', family: 'Family', signOut: 'Sign out' },
 
     family: {
       // Parent panel
@@ -91,7 +91,7 @@ export const LABELS = {
   },
 
   HI: {
-    nav: { money: 'मेरा पैसा', wealth: 'वेल्थ हब', identity: 'पहचान', family: 'परिवार', signOut: 'साइन आउट' },
+    nav: { money: 'मेरा पैसा', wealth: 'वेल्थ हब', arena: 'क्रिप्टो एरीना', identity: 'पहचान', family: 'परिवार', signOut: 'साइन आउट' },
 
     family: {
       parentTitle: 'परिवार — बच्चों के लिए Money Quest',

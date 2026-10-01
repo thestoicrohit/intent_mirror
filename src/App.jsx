@@ -7,6 +7,7 @@ import MyMoney from './components/MyMoney'
 import IdentityCard from './components/IdentityCard'
 import WealthHub from './components/WealthHub'
 import FamilyMode from './components/FamilyMode'
+import CryptoArena from './components/CryptoArena'
 import { getActiveWallet, signOut, shortAddress } from './web3/wallet'
 
 export const AppContext = createContext(null)
@@ -15,6 +16,7 @@ export const useApp = () => useContext(AppContext)
 const NAV = [
   { id: 'money',    label: 'My Money',   icon: '◉' },
   { id: 'wealth',   label: 'Wealth Hub', icon: '◈' },
+  { id: 'arena',    label: 'Crypto Arena', icon: '◎', badge: 'LIVE' },
   { id: 'family',   label: 'Family',     icon: '◐', badge: 'KIDS' },
   { id: 'identity', label: 'Identity',   icon: '⬡', badge: 'WEB3' },
 ]
@@ -150,6 +152,7 @@ export default function App() {
         <main>
           {activeSection === 'money'    && <MyMoney wallet={wallet} onOpenIdentity={() => setActiveSection('identity')} />}
           {activeSection === 'wealth'   && <WealthHub />}
+          {activeSection === 'arena'    && <CryptoArena />}
           {activeSection === 'family'   && <FamilyMode wallet={wallet} />}
           {activeSection === 'identity' && <IdentityCard wallet={wallet} />}
         </main>
