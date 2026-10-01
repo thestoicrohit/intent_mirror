@@ -1,20 +1,29 @@
-import { useState, createContext, useContext } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
+import { AppContext } from './context'
 import { LABELS } from './i18n'
 import { DARK, LIGHT } from './theme'
 import LandingPage from './components/LandingPage'
 import Onboarding from './components/Onboarding'
-import MyMoney from './components/MyMoney'
-import IdentityCard from './components/IdentityCard'
-import WealthHub from './components/WealthHub'
-import FamilyMode from './components/FamilyMode'
-import CryptoArena from './components/CryptoArena'
+const MyMoney = lazy(() => import('./components/MyMoney'))
+const IdentityCard = lazy(() => import('./components/IdentityCard'))
+const WealthHub = lazy(() => import('./components/WealthHub'))
+const FamilyMode = lazy(() => import('./components/FamilyMode'))
+const CryptoArena = lazy(() => import('./components/CryptoArena'))
 import { getActiveWallet, signOut, shortAddress } from './web3/wallet'
 import { getUser } from './web3/auth'
+import { setTone } from './ui'
 
-const GUEST = { email: 'guest', address: '0x0000000000000000000000000000000000000000', guest: true }
+/** Browsing without an account: a stable per-browser guest profile (so guests don't share data). */
+function makeGuest() {
+  let id = ''
+  try {
+    id = localStorage.getItem('im_guest_id') || ''
+    if (!id) { id = Array.from(crypto.getRandomValues(new Uint8Array(20)), b => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('im_guest_id', id) }
+  } catch { id = '0'.repeat(40) }
+  return { email: 'guest', address: '0x' + id, guest: true }
+}
+const GUEST = makeGuest()
 
-export const AppContext = createContext(null)
-export const useApp = () => useContext(AppContext)
 
 const NAV = [
   { id: 'money',    label: 'My Money',   icon: '◉' },
@@ -31,12 +40,14 @@ export default function App() {
   const [lang, setLang]                   = useState('EN')
   const [isDark, setIsDark]               = useState(true)
   const [activeSection, setActiveSection] = useState('money')
-  const [activeTab, setActiveTab]         = useState('tabHarvest')   // legacy, kept for context shape
   const [menuOpen, setMenuOpen]           = useState(false)
 
   const wallet = account || GUEST        // browsing without an account uses a local guest profile
+  useEffect(() => { document.documentElement.dataset.theme = isDark ? 'dark' : 'light' }, [isDark])
+
   const t = LABELS[lang]
   const c = isDark ? DARK : LIGHT
+  setTone(isDark)                       // theme-aware up/down colours for the Arena
 
   /* ── Animated landing (the entrance) ────────────────── */
   if (view === 'landing') {
@@ -65,16 +76,16 @@ export default function App() {
   return (
     <AppContext.Provider value={{
       lang, setLang: (v) => setLang(typeof v === 'function' ? v(lang) : v),
-      t, activeTab, setActiveTab,
+      t,
       activeSection, setActiveSection,
       isDark, setIsDark: (v) => setIsDark(typeof v === 'function' ? v(isDark) : v),
       c, wallet,
     }}>
-      <div style={{ minHeight: '100vh', background: c.bg, color: c.text }}>
+      <div style={{ minHeight: '100vh', background: isDark ? 'transparent' : c.bg, color: c.text }}>
 
         {/* ── Header ─────────────────────────────────────── */}
         <header style={{
-          background: c.headerBg, borderBottom: `1px solid ${c.border}`,
+          background: c.headerBg, borderBottom: `1px solid ${c.border}`, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
           position: 'sticky', top: 0, zIndex: 100,
           display: 'flex', alignItems: 'center', gap: 8, padding: '0 24px', height: 54,
         }}>
@@ -84,7 +95,7 @@ export default function App() {
               width: 28, height: 28, borderRadius: 7,
               background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, color: '#fff', fontWeight: 800,
+              fontSize: 13, color: c.onAccent, fontWeight: 800,
             }}>⬡</div>
             <div style={{ fontSize: 14, fontWeight: 800 }}>Intent Mirror</div>
           </div>
@@ -95,7 +106,7 @@ export default function App() {
               const active = activeSection === item.id
               return (
                 <button key={item.id} onClick={() => setActiveSection(item.id)} style={{
-                  background: active ? 'rgba(86,143,124,0.14)' : 'transparent',
+                  background: active ? 'rgba(69,217,184,0.14)' : 'transparent',
                   border: `1px solid ${active ? c.borderStrong : 'transparent'}`,
                   borderRadius: 7, padding: '6px 14px',
                   color: active ? c.accent : c.textDim,
@@ -126,9 +137,9 @@ export default function App() {
           {wallet.guest ? (
             <>
               <button onClick={() => setAuthMode('login')} style={ctrlBtn(c)}>Log in</button>
-              <button onClick={() => setAuthMode('signup')} style={{
+              <button className="glow-btn" onClick={() => setAuthMode('signup')} style={{
                 background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, border: 'none', borderRadius: 7,
-                padding: '0 14px', height: 32, color: '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                padding: '0 14px', height: 32, color: c.onAccent, fontSize: 12, fontWeight: 700, cursor: 'pointer',
               }}>Sign up free</button>
             </>
           ) : (
@@ -140,7 +151,7 @@ export default function App() {
                 background: c.card, border: `1px solid ${c.border}`,
                 borderRadius: 20, padding: '4px 10px 4px 4px', cursor: 'pointer',
               }}>
-                <div style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})` }} />
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, color: c.onAccent, fontSize: 12, fontWeight: 800, display: 'grid', placeItems: 'center' }}>{initials(wallet.email)}</div>
                 <span style={{ fontSize: 11.5, fontWeight: 700, fontFamily: 'monospace', color: c.text }}>
                   {shortAddress(wallet.address)}
                 </span>
@@ -169,15 +180,34 @@ export default function App() {
 
         {/* ── Content ────────────────────────────────────── */}
         <main>
+          <Suspense fallback={<PageSkeleton />}>
           {activeSection === 'money'    && <MyMoney wallet={wallet} onOpenIdentity={() => setActiveSection('identity')} />}
           {activeSection === 'wealth'   && <WealthHub />}
           {activeSection === 'arena'    && <CryptoArena />}
           {activeSection === 'family'   && <FamilyMode wallet={wallet} />}
           {activeSection === 'identity' && <IdentityCard wallet={wallet} onSignup={() => setAuthMode('signup')} />}
+          </Suspense>
         </main>
       </div>
     </AppContext.Provider>
   )
+}
+
+function PageSkeleton() {
+  return (
+    <div style={{ maxWidth: 1180, margin: '0 auto', padding: '28px 20px', display: 'grid', gap: 14 }}>
+      <div className="skeleton" style={{ height: 34, width: 260 }} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
+        {[0, 1, 2].map(i => <div key={i} className="skeleton" style={{ height: 130 }} />)}
+      </div>
+      <div className="skeleton" style={{ height: 280 }} />
+    </div>
+  )
+}
+
+function initials(email) {
+  const name = getUser(email)?.name || email
+  return (name.trim()[0] || '?').toUpperCase()
 }
 
 function ctrlBtn(c) {

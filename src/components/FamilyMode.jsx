@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { keccak256, toHex } from 'viem'
-import { useApp } from '../App'
+import { useApp } from '../context'
 import {
   getFamily, updateFamily, completeMission, saveToGoal, getMissions,
   FALLBACK_FAMILY, FALLBACK_MISSIONS,
@@ -141,12 +141,12 @@ export default function FamilyMode({ wallet }) {
             }}>{savedFlash ? tf.saved : tf.save}</button>
             <button onClick={() => setKidMode(true)} style={{
               background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, border: 'none', borderRadius: 9,
-              padding: '10px 20px', color: '#fff', fontSize: 13, fontWeight: 800, cursor: 'pointer',
+              padding: '10px 20px', color: c.onAccent, fontSize: 13, fontWeight: 800, cursor: 'pointer',
             }}>{tf.startQuest}</button>
           </div>
         </div>
 
-        <div style={{ ...card, background: isDark ? 'rgba(86,143,124,0.08)' : 'rgba(33,80,82,0.08)' }}>
+        <div style={{ ...card, background: isDark ? 'rgba(69,217,184,0.08)' : 'rgba(33,80,82,0.08)' }}>
           <div style={{ fontSize: 12, fontWeight: 800, color: c.accent, marginBottom: 6 }}>💡 {tf.whyTitle}</div>
           <p style={{ fontSize: 12.5, color: c.textMuted, lineHeight: 1.6, margin: 0 }}>{tf.whyBody}</p>
         </div>
@@ -164,7 +164,7 @@ export default function FamilyMode({ wallet }) {
 
       {/* Hero */}
       <div style={{
-        ...card, padding: 22, color: '#fff',
+        ...card, padding: 22, color: c.onAccent,
         background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`, border: 'none',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -173,8 +173,8 @@ export default function FamilyMode({ wallet }) {
             <div style={{ fontSize: 13, opacity: 0.9 }}>{tf.questTitle}</div>
           </div>
           <button onClick={() => setKidMode(false)} style={{
-            background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.4)',
-            borderRadius: 20, padding: '5px 12px', color: '#fff', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+            background: 'rgba(0,0,0,0.18)', border: '1px solid rgba(0,0,0,0.25)',
+            borderRadius: 20, padding: '5px 12px', color: c.onAccent, fontSize: 11, fontWeight: 700, cursor: 'pointer',
           }}>{tf.backToParent}</button>
         </div>
 
@@ -258,7 +258,7 @@ export default function FamilyMode({ wallet }) {
                     </p>
                     <button onClick={() => doMission(m)} style={{
                       background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, border: 'none', borderRadius: 9,
-                      padding: '9px 18px', color: '#fff', fontSize: 12.5, fontWeight: 800, cursor: 'pointer',
+                      padding: '9px 18px', color: c.onAccent, fontSize: 12.5, fontWeight: 800, cursor: 'pointer',
                     }}>{tf.gotIt}</button>
                   </div>
                 )}
@@ -289,7 +289,7 @@ export default function FamilyMode({ wallet }) {
             <div style={{ fontSize: 12, color: c.textMuted, maxWidth: 420, margin: '6px auto 14px', lineHeight: 1.6 }}>{tf.badgeBody}</div>
             <button onClick={claimBadge} disabled={claiming} style={{
               background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, border: 'none', borderRadius: 10,
-              padding: '11px 22px', color: '#fff', fontSize: 13.5, fontWeight: 800, cursor: claiming ? 'wait' : 'pointer',
+              padding: '11px 22px', color: c.onAccent, fontSize: 13.5, fontWeight: 800, cursor: claiming ? 'wait' : 'pointer',
             }}>{claiming ? '…' : tf.claimBadge}</button>
           </>
         )}

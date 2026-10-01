@@ -8,29 +8,10 @@ import {
   AreaChart, Area, LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, Tooltip,
   ResponsiveContainer, ReferenceLine, Treemap, CartesianGrid,
 } from 'recharts'
-import { useApp } from '../App'
+import { useApp } from '../context'
 import { useCryptoData, fmtPrice, fmtCap, fmtPct } from '../data/crypto'
 import GamesArcade from './arena/GamesArcade'
-
-const UP = '#6ABFA0'
-const DOWN = '#E05A3A'
-
-function Card({ c, children, style }) {
-  return (
-    <div style={{ background: c.card, border: `1px solid ${c.border}`, borderRadius: 14, padding: 16, ...style }}>
-      {children}
-    </div>
-  )
-}
-
-function SectionTitle({ c, children, right }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.2, color: c.textDim, textTransform: 'uppercase' }}>{children}</div>
-      {right}
-    </div>
-  )
-}
+import { Card, SectionTitle, chipStyle, UP, DOWN } from '../ui'
 
 function StatusBadge({ status, updatedAt, onRefresh, c }) {
   const map = {
@@ -122,11 +103,17 @@ function Markets({ coins, c }) {
   const [mode, setMode] = useState('pct')       // pct | price
   const [range, setRange] = useState(168)       // hours of the 7d window
   const [sortKey, setSortKey] = useState('mcap')
+  const [watch, setWatch] = useState(() => { try { return JSON.parse(localStorage.getItem('im_watch') || '[]') } catch { return [] } })
+  const toggleWatch = (id) => setWatch(w => {
+    const n = w.includes(id) ? w.filter(x => x !== id) : [...w, id]
+    try { localStorage.setItem('im_watch', JSON.stringify(n)) } catch { /* private mode */ }
+    return n
+  })
 
   const shown = useMemo(() => {
-    const list = coins.filter(x => group === 'all' || x.group === group)
+    const list = coins.filter(x => group === 'all' || (group === 'watch' ? watch.includes(x.id) : x.group === group))
     return [...list].sort((a, b) => sortKey === 'mcap' ? b.mcap - a.mcap : b[sortKey] - a[sortKey])
-  }, [coins, group, sortKey])
+  }, [coins, group, sortKey, watch])
 
   const memes = coins.filter(x => x.group === 'sol')
   const avgMeme = memes.reduce((s, x) => s + x.d1, 0) / memes.length
@@ -154,11 +141,7 @@ function Markets({ coins, c }) {
   const bars = [...coins].sort((a, b) => b.d1 - a.d1).map(x => ({ symbol: x.symbol, d1: +x.d1.toFixed(2) }))
   const tree = memes.map(x => ({ name: x.symbol, symbol: x.symbol, size: x.mcap, d1: x.d1, emoji: x.emoji }))
 
-  const chip = (active, col = c.accent) => ({
-    padding: '5px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700, cursor: 'pointer',
-    background: active ? `${col}22` : 'transparent', color: active ? col : c.textDim,
-    border: `1px solid ${active ? col : c.border}`,
-  })
+  const chip = (active, col = c.accent) => chipStyle(c, active, col)
 
   return (
     <div style={{ display: 'grid', gap: 16 }}>
@@ -174,7 +157,7 @@ function Markets({ coins, c }) {
           { l: 'Top mover · 24h', v: `${best.emoji} ${best.symbol}`, s: fmtPct(best.d1), col: UP },
           { l: 'Biggest drop · 24h', v: `${worst.emoji} ${worst.symbol}`, s: fmtPct(worst.d1), col: DOWN },
         ].map(t => (
-          <Card c={c} key={t.l} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Card c={c} className="lift" key={t.l} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ fontSize: 10, color: c.textDim, fontWeight: 700, letterSpacing: .6, textTransform: 'uppercase' }}>{t.l}</div>
             <div style={{ fontSize: 26, fontWeight: 800, color: c.text, margin: '6px 0 2px' }}>{t.v}</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: t.col }}>{t.s}</div>
@@ -252,7 +235,7 @@ function Markets({ coins, c }) {
       <Card c={c} style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px 10px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
           <div style={{ display: 'flex', gap: 6 }}>
-            {[['all', 'All'], ['sol', '◎ Solana memes'], ['major', 'Majors']].map(([k, l]) => <button key={k} onClick={() => setGroup(k)} style={chip(group === k)}>{l}</button>)}
+            {[['all', 'All'], ['sol', '◎ Solana memes'], ['major', 'Majors'], ['watch', `★ Watchlist${watch.length ? ` (${watch.length})` : ''}`]].map(([k, l]) => <button key={k} onClick={() => setGroup(k)} style={chip(group === k)}>{l}</button>)}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {[['mcap', 'Market cap'], ['d1', '24h'], ['d7', '7d']].map(([k, l]) => <button key={k} onClick={() => setSortKey(k)} style={chip(sortKey === k, '#5B9ED6')}>{l}</button>)}
@@ -260,6 +243,9 @@ function Markets({ coins, c }) {
         </div>
         <div style={{ overflowX: 'auto' }}>
           <div style={{ minWidth: 640 }}>
+            {shown.length === 0 && (
+              <div style={{ padding: '28px 16px', textAlign: 'center', color: c.textDim, fontSize: 13 }}>Star ☆ a coin to build your watchlist.</div>
+            )}
             {shown.map((x, i) => {
               const up = x.d1 >= 0, up7 = x.d7 >= 0
               const data = x.spark.map(v => ({ v }))
@@ -270,7 +256,7 @@ function Markets({ coins, c }) {
                   alignItems: 'center', padding: '9px 16px', cursor: 'pointer',
                   background: i % 2 ? c.rowOdd : c.rowEven, borderTop: `1px solid ${c.border}`,
                 }}>
-                  <span style={{ fontSize: 10, color: c.textDim }}>{i + 1}</span>
+                  <button onClick={e => { e.stopPropagation(); toggleWatch(x.id) }} aria-label={watch.includes(x.id) ? 'Remove from watchlist' : 'Add to watchlist'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, padding: 0, color: watch.includes(x.id) ? '#F5B83D' : c.textDim }}>{watch.includes(x.id) ? '★' : '☆'}</button>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                     <span style={{ width: 28, height: 28, borderRadius: '50%', background: `${x.color}25`, border: `1px solid ${x.color}60`, display: 'grid', placeItems: 'center', fontSize: 14 }}>{x.emoji}</span>
                     <div>
@@ -323,7 +309,7 @@ export default function CryptoArena() {
         {[['markets', '📈 Markets'], ['games', '🎮 Games']].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} style={{
             padding: '8px 18px', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer',
-            background: tab === k ? 'rgba(86,143,124,0.16)' : 'transparent',
+            background: tab === k ? 'rgba(69,217,184,0.16)' : 'transparent',
             color: tab === k ? c.accent : c.textDim,
             border: `1px solid ${tab === k ? c.borderStrong : 'transparent'}`,
           }}>{l}</button>

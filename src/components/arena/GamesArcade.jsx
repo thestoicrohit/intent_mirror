@@ -7,9 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts'
 import { fmtPct, fmtPrice } from '../../data/crypto'
 
-const UP = '#6ABFA0'
-const DOWN = '#E05A3A'
-const GOLD = '#D4A853'
+import { UP, DOWN, GOLD, btnStyle as btn, Confetti } from '../../ui'
 
 /* ── persisted stats ── */
 const KEY = 'im_arena_stats_v1'
@@ -38,9 +36,9 @@ function useStats() {
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)]
 const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
 
-function Shell({ c, title, tag, desc, color, children, right }) {
+function Shell({ c, title, tag, desc, color, children, right, win }) {
   return (
-    <div style={{ background: c.card, border: `1px solid ${c.border}`, borderTop: `3px solid ${color}`, borderRadius: 14, padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div className="lift" style={{ position: 'relative', background: c.card, border: `1px solid ${c.border}`, borderTop: `3px solid ${color}`, borderRadius: 14, padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 800, color: c.text }}>{title}</div>
@@ -52,15 +50,10 @@ function Shell({ c, title, tag, desc, color, children, right }) {
         </div>
       </div>
       {children}
+      {win ? <Confetti key={win} /> : null}
     </div>
   )
 }
-
-const btn = (col, solid = false, disabled = false) => ({
-  padding: '10px 16px', borderRadius: 9, fontSize: 13, fontWeight: 800, cursor: disabled ? 'not-allowed' : 'pointer',
-  background: solid ? col : `${col}18`, color: solid ? '#06131F' : col, border: `1px solid ${col}${solid ? '' : '60'}`,
-  opacity: disabled ? 0.45 : 1, transition: 'transform .1s',
-})
 
 /* ═════════ 1 · Pump Duel ═════════ */
 function PumpDuel({ coins, c, stats, update }) {
@@ -86,7 +79,7 @@ function PumpDuel({ coins, c, stats, update }) {
 
   return (
     <Shell c={c} color="#5B9ED6" tag="HIGHER / LOWER" title="⚔️ Pump Duel"
-      desc="Which coin pumped harder over the last 7 days? Pick the winner." right={`🔥 ${streak} · best ${stats.duel.best}`}>
+      desc="Which coin pumped harder over the last 7 days? Pick the winner." win={res?.ok ? `${pair[0].id}${stats.duel.played}` : null} right={`🔥 ${streak} · best ${stats.duel.best}`}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {pair.map(x => {
           const winnerId = pair[0].d7 >= pair[1].d7 ? pair[0].id : pair[1].id
@@ -111,7 +104,7 @@ function PumpDuel({ coins, c, stats, update }) {
         <div style={{ fontSize: 12.5, fontWeight: 700, color: res ? (res.ok ? UP : DOWN) : c.textDim }}>
           {res ? (res.ok ? '✅ Nice read!' : '❌ Missed it — momentum is hard to call.') : 'Tap the coin you think pumped more.'}
         </div>
-        {res && <button onClick={next} style={btn('#5B9ED6', true)}>Next →</button>}
+        {res && <button onClick={next} style={btn('#6AA6FF', true)}>Next →</button>}
       </div>
     </Shell>
   )
@@ -148,7 +141,7 @@ function ChartReader({ coins, c, stats, update }) {
   return (
     <Shell c={c} color={UP} tag="PREDICT" title="🔮 Chart Reader"
       desc={`Here's a real 7-day chart, cut off. Will ${coin.symbol} be higher or lower 24 hours later?`}
-      right={`🔥 ${stats.reader.streak} · ${stats.reader.played ? Math.round(stats.reader.right / stats.reader.played * 100) : 0}% acc`}>
+      win={ok ? `${coin.id}${stats.reader.played}` : null} right={`🔥 ${stats.reader.streak} · ${stats.reader.played ? Math.round(stats.reader.right / stats.reader.played * 100) : 0}% acc`}>
       <div style={{ height: 170 }}>
         <ResponsiveContainer>
           <AreaChart data={data} margin={{ top: 6, right: 6, left: 6, bottom: 0 }}>
@@ -230,7 +223,7 @@ function RugRunner({ c, stats, update }) {
   return (
     <Shell c={c} color={DOWN} tag="NERVES" title="💀 Rug Runner"
       desc="Buy in, watch the price climb, and sell before the dev rugs. Greed kills — so does panic."
-      right={`Bank: ${bank} pts`}>
+      win={phase === 'cashed' ? `cash${stats.rug.rounds}` : null} right={`Bank: ${bank} pts`}>
       <div style={{ height: 170, position: 'relative', background: c.inputBg, borderRadius: 10 }}>
         <ResponsiveContainer>
           <AreaChart data={path} margin={{ top: 10, right: 8, left: 8, bottom: 0 }}>
@@ -297,7 +290,7 @@ function MemeMatch({ coins, c, stats, update }) {
 
   return (
     <Shell c={c} color="#9B8FD6" tag="MEMORY" title="🃏 Meme Match"
-      desc="Match the Solana memecoin pairs in as few moves as you can." right={`Moves ${moves}${stats.match.best ? ` · best ${stats.match.best}` : ''}`}>
+      desc="Match the Solana memecoin pairs in as few moves as you can." win={won ? `won${moves}` : null} right={`Moves ${moves}${stats.match.best ? ` · best ${stats.match.best}` : ''}`}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
         {cards.map((card, i) => {
           const up = open.includes(i) || done.has(i)
@@ -334,7 +327,7 @@ function DegenProfile({ stats, c, onReset }) {
   if (hasData) {
     if (rug.rounds >= 3 && rugRate > 0.5) persona = { n: 'The Exiter… too late', e: '🚪', col: DOWN, d: 'You hold past the exit and get rugged often. Set a target before you buy in — and sell when you hit it.' }
     else if (rug.cashed >= 3 && avgCash < 1.4) persona = { n: 'The Anxious Saver', e: '😌', col: GOLD, d: 'You sell early and safe. Great for capital, but you may leave real upside on the table.' }
-    else if (acc >= 0.62 && reader.played + duel.played >= 6) persona = { n: 'The Optimizer', e: '📊', col: '#5B9ED6', d: 'You read charts well and weigh data before acting. Keep position sizes small — skill still meets luck.' }
+    else if (acc >= 0.62 && reader.played + duel.played >= 6) persona = { n: 'The Optimizer', e: '📊', col: '#6AA6FF', d: 'You read charts well and weigh data before acting. Keep position sizes small — skill still meets luck.' }
     else persona = { n: 'The Protector', e: '🛡', col: UP, d: 'Balanced and disciplined: you take profit at sensible levels without chasing the moon.' }
   }
 

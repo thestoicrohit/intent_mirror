@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useApp } from '../App'
+import { useApp } from '../context'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import {
   HOLDINGS, ACTIVITY, ASSET_CLASSES, EXPECTED_CAGR,

@@ -1,24 +1,25 @@
 export const DARK = {
-  bg:          '#08172A',   // very dark navy — clearly darker than cards
-  bgDeep:      '#040E1A',
-  card:        '#132535',   // medium navy — visible lift above bg
-  cardAlt:     '#1C3348',   // even lighter — for modals, alt surfaces
-  text:        '#BDD1BD',
-  textMuted:   '#85B093',
-  textDim:     '#568F7C',
-  accent:      '#568F7C',
-  accent2:     '#3D7A72',
-  border:      'rgba(86,143,124,0.20)',
-  borderStrong:'rgba(86,143,124,0.40)',
-  danger:      '#E05A3A',
-  warning:     '#D4A853',
-  positive:    '#85B093',
-  neutral:     '#BDD1BD',
-  headerBg:    'rgba(8,23,42,0.97)',
-  inputBg:     '#04111E',
-  modalBg:     '#132535',
-  rowEven:     '#132535',
-  rowOdd:      '#0E1F30',
+  bg:          '#070B16',   // midnight ink
+  bgDeep:      '#04070F',
+  card:        'rgba(19,27,48,0.72)',   // glassy navy — the aurora glows through
+  cardAlt:     'rgba(30,41,72,0.86)',
+  text:        '#E8EEF9',
+  textMuted:   '#A5B4CE',
+  textDim:     '#7B8DAE',
+  accent:      '#45D9B8',   // electric mint
+  accent2:     '#8B7CF6',   // soft violet — pairs with accent in gradients
+  onAccent:    '#04201B',   // text on accent-filled buttons (readable on mint)
+  border:      'rgba(140,165,230,0.15)',
+  borderStrong:'rgba(90,230,200,0.38)',
+  danger:      '#FF6B7A',
+  warning:     '#F5B83D',
+  positive:    '#4ADE9B',
+  neutral:     '#E8EEF9',
+  headerBg:    'rgba(7,11,22,0.72)',
+  inputBg:     '#050912',
+  modalBg:     '#101830',
+  rowEven:     'rgba(19,27,48,0.55)',
+  rowOdd:      'rgba(11,17,34,0.55)',
 }
 
 export const LIGHT = {
@@ -31,6 +32,7 @@ export const LIGHT = {
   textDim:     '#1C3A45',
   accent:      '#215052',
   accent2:     '#37706A',
+  onAccent:    '#FFFFFF',
   border:      'rgba(33,80,82,0.25)',
   borderStrong:'rgba(33,80,82,0.45)',
   danger:      '#C4573A',

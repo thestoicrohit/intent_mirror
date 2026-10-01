@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useApp } from '../App'
+import { useApp } from '../context'
 import { shortAddress } from '../web3/wallet'
 import { mintCredential, getCredential, ONCHAIN_ENABLED } from '../web3/credential'
 import { HOLDINGS, ACTIVITY, computePortfolio, deriveMoneyPersona, deriveSignals } from '../data/portfolio'
@@ -73,7 +73,7 @@ export default function IdentityCard({ wallet, onSignup }) {
           <button onClick={wallet?.guest ? onSignup : handleMint} disabled={minting} style={{
             background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`,
             border: 'none', borderRadius: 10, padding: '13px 26px',
-            color: '#fff', fontSize: 14, fontWeight: 700, cursor: minting ? 'wait' : 'pointer',
+            color: c.onAccent, fontSize: 14, fontWeight: 700, cursor: minting ? 'wait' : 'pointer',
           }}>
             {wallet?.guest ? 'Create a free account to mint →' : minting ? ti.minting : ti.mintBtn}
           </button>
@@ -87,7 +87,7 @@ export default function IdentityCard({ wallet, onSignup }) {
           <div style={{
             padding: 20,
             background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`,
-            color: '#fff',
+            color: c.onAccent,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
@@ -120,7 +120,7 @@ export default function IdentityCard({ wallet, onSignup }) {
                 {credential.signals.map(s => (
                   <span key={s} style={{
                     fontSize: 11, padding: '3px 9px', borderRadius: 20,
-                    background: isDark ? 'rgba(86,143,124,0.14)' : 'rgba(33,80,82,0.1)',
+                    background: isDark ? 'rgba(69,217,184,0.14)' : 'rgba(33,80,82,0.1)',
                     border: `1px solid ${c.border}`, color: c.textMuted,
                   }}>{s}</span>
                 ))}
@@ -131,7 +131,7 @@ export default function IdentityCard({ wallet, onSignup }) {
           {/* who can read it */}
           <div style={{
             padding: 16, borderTop: `1px solid ${c.border}`,
-            background: isDark ? 'rgba(86,143,124,0.06)' : 'rgba(33,80,82,0.06)',
+            background: isDark ? 'rgba(69,217,184,0.06)' : 'rgba(33,80,82,0.06)',
             fontSize: 12, color: c.textMuted, lineHeight: 1.6,
           }}>
             🔓 {ti.controlNote}

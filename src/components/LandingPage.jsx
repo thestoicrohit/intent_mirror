@@ -13,7 +13,7 @@ function CursorAurora() {
     <>
       <div className="cursor-aurora" style={{
         left: pos.x - 280, top: pos.y - 280, width: 560, height: 560,
-        background: 'radial-gradient(circle, rgba(86,143,124,0.16) 0%, rgba(61,122,114,0.05) 45%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(69,217,184,0.16) 0%, rgba(139,124,246,0.05) 45%, transparent 70%)',
       }} />
       <div className="cursor-aurora" style={{
         left: pos.x - 110, top: pos.y - 110, width: 220, height: 220,
@@ -51,7 +51,7 @@ function HeroOrb({ c, isDark }) {
         border: `2px solid ${c.borderStrong}`,
       }}>
         <div style={{
-          width: 64, height: 64, borderRadius: 16, fontSize: 34, fontWeight: 800, color: '#fff',
+          width: 64, height: 64, borderRadius: 16, fontSize: 34, fontWeight: 800, color: c.onAccent,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`,
         }}>⬡</div>
@@ -127,8 +127,8 @@ export default function LandingPage({ onEnter, isDark, onToggleTheme }) {
       <div className="bg-mesh" style={{
         position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0,
         background: isDark
-          ? `radial-gradient(ellipse at 25% 55%, rgba(86,143,124,0.10) 0%, transparent 55%), radial-gradient(ellipse at 78% 18%, rgba(61,122,114,0.08) 0%, transparent 50%), ${c.bg}`
-          : `radial-gradient(ellipse at 25% 55%, rgba(33,80,82,0.12) 0%, transparent 55%), radial-gradient(ellipse at 75% 20%, rgba(86,143,124,0.10) 0%, transparent 50%), ${c.bg}`,
+          ? `radial-gradient(ellipse at 25% 55%, rgba(69,217,184,0.10) 0%, transparent 55%), radial-gradient(ellipse at 78% 18%, rgba(139,124,246,0.08) 0%, transparent 50%), ${c.bg}`
+          : `radial-gradient(ellipse at 25% 55%, rgba(33,80,82,0.12) 0%, transparent 55%), radial-gradient(ellipse at 75% 20%, rgba(69,217,184,0.10) 0%, transparent 50%), ${c.bg}`,
       }} />
       {/* drifting particles */}
       <div className="particle-a" style={{ position: 'fixed', top: '22%', left: '14%', width: 6, height: 6, borderRadius: '50%', background: c.accent, zIndex: 1, pointerEvents: 'none' }} />
@@ -138,7 +138,7 @@ export default function LandingPage({ onEnter, isDark, onToggleTheme }) {
       {/* top bar */}
       <div style={{ position: 'relative', zIndex: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 28px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: '#fff' }}>⬡</div>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 800, color: c.onAccent }}>⬡</div>
           <div style={{ fontSize: 15, fontWeight: 800 }}>Intent Mirror</div>
         </div>
         <button onClick={onToggleTheme} style={{
@@ -164,9 +164,9 @@ export default function LandingPage({ onEnter, isDark, onToggleTheme }) {
             No MetaMask, no seed phrase. There's even a mode that teaches kids.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <button onClick={onEnter} style={{
+            <button className="glow-btn" onClick={onEnter} style={{
               background: `linear-gradient(135deg, ${c.accent}, ${c.accent2})`, border: 'none', borderRadius: 12,
-              padding: '15px 30px', color: '#fff', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+              padding: '15px 30px', color: c.onAccent, fontSize: 15, fontWeight: 800, cursor: 'pointer',
               boxShadow: `0 10px 30px ${c.accent}44`,
             }}>Get Started →</button>
             <span style={{ fontSize: 12.5, color: c.textDim }}>🔐 A wallet is created for you — instantly, no setup.</span>

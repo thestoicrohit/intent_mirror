@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { AreaChart, Area, ResponsiveContainer } from 'recharts'
-import { useApp } from '../App'
+import { useApp } from '../context'
 import { deriveMoneyPersona } from '../data/portfolio'
 
 /* ─── Mock NSE/BSE stock data ────────────────────────────────────────── */
@@ -93,7 +93,7 @@ function StockRow({ s, idx, c, live }) {
       padding: '9px 14px', alignItems: 'center', borderBottom: `1px solid ${c.border}`,
       background: idx % 2 === 0 ? c.rowEven : c.rowOdd, cursor: 'pointer',
     }}
-      onMouseEnter={e => e.currentTarget.style.background = `rgba(86,143,124,0.08)`}
+      onMouseEnter={e => e.currentTarget.style.background = `rgba(69,217,184,0.08)`}
       onMouseLeave={e => e.currentTarget.style.background = idx % 2 === 0 ? c.rowEven : c.rowOdd}
     >
       <span style={{ fontSize: 10, color: c.textDim, fontWeight: 600 }}>{idx + 1}</span>
@@ -126,12 +126,10 @@ function StockRow({ s, idx, c, live }) {
 /* ─── MF Card ─────────────────────────────────────────────────────────── */
 function MFCard({ f, c }) {
   return (
-    <div style={{
+    <div className="lift" style={{
       background: c.card, border: `1px solid ${c.border}`, borderRadius: 12,
       padding: '14px 16px', borderTop: `3px solid ${f.color}`, cursor: 'pointer',
     }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 24px rgba(0,0,0,0.2)` }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
         <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 10, background: `${f.color}18`, color: f.color, fontWeight: 700 }}>{f.tag}</span>
@@ -146,7 +144,7 @@ function MFCard({ f, c }) {
           <div style={{ fontSize: 16, fontWeight: 800, color: f.color }}>{f.returns1y}</div>
           <div style={{ fontSize: 9, color: c.textDim, marginTop: 2 }}>1Y Returns</div>
         </div>
-        <div style={{ flex: 1, background: `rgba(86,143,124,0.08)`, borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+        <div style={{ flex: 1, background: `rgba(69,217,184,0.08)`, borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
           <div style={{ fontSize: 16, fontWeight: 800, color: c.accent }}>{f.returns3y}</div>
           <div style={{ fontSize: 9, color: c.textDim, marginTop: 2 }}>3Y CAGR</div>
         </div>
@@ -163,9 +161,7 @@ function MFCard({ f, c }) {
 /* ─── Insurance Card ─────────────────────────────────────────────────── */
 function InsuranceCard({ p, c }) {
   return (
-    <div style={{ background: c.card, border: `1px solid ${c.border}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer' }}
-      onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-      onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+    <div className="lift" style={{ background: c.card, border: `1px solid ${c.border}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer' }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -223,7 +219,7 @@ export default function WealthHub() {
   const tabBtn = (id) => ({
     padding: '7px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
     border: `1px solid ${activeTab === id ? c.accent : c.border}`,
-    background: activeTab === id ? `rgba(86,143,124,0.14)` : 'transparent',
+    background: activeTab === id ? `rgba(69,217,184,0.14)` : 'transparent',
     color: activeTab === id ? c.accent : c.textMuted, transition: 'all 0.15s',
   })
 
@@ -259,7 +255,7 @@ export default function WealthHub() {
 
       {/* ── Live stock ticker strip ───────────────────── */}
       <div style={{ background: c.card, border: `1px solid ${c.border}`, borderRadius: 12, padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 16, overflow: 'hidden' }}>
-        <span style={{ fontSize: 9, color: c.accent, fontWeight: 800, letterSpacing: 1, padding: '3px 8px', background: `rgba(86,143,124,0.12)`, border: `1px solid ${c.border}`, borderRadius: 4, flexShrink: 0 }}>NSE LIVE</span>
+        <span style={{ fontSize: 9, color: c.accent, fontWeight: 800, letterSpacing: 1, padding: '3px 8px', background: `rgba(69,217,184,0.12)`, border: `1px solid ${c.border}`, borderRadius: 4, flexShrink: 0 }}>NSE LIVE</span>
         <div style={{ display: 'flex', gap: 20, overflowX: 'auto', flex: 1 }}>
           {BASE_STOCKS.map(s => {
             const price = liveStocks[s.symbol] || s.price
@@ -352,7 +348,7 @@ export default function WealthHub() {
       {/* ── Mutual Funds Tab ──────────────────────────── */}
       {activeTab === 'mf' && (
         <div>
-          <div style={{ marginBottom: 14, padding: '12px 16px', background: `rgba(86,143,124,0.07)`, border: `1px solid ${c.border}`, borderRadius: 10, fontSize: 12, color: c.textMuted }}>
+          <div style={{ marginBottom: 14, padding: '12px 16px', background: `rgba(69,217,184,0.07)`, border: `1px solid ${c.border}`, borderRadius: 10, fontSize: 12, color: c.textMuted }}>
             <strong style={{ color: c.text }}>💡 New to funds?</strong> A SIP lets you invest a fixed amount every month — you ride out the ups and downs automatically. You can start with as little as <strong style={{ color: '#6ABFA0' }}>₹100</strong> and stop anytime.
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
@@ -382,8 +378,6 @@ export default function WealthHub() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
             {LITERACY_CARDS.map((card, i) => (
               <div key={i} style={{ background: c.card, border: `1px solid ${c.border}`, borderRadius: 12, padding: '18px 20px', borderLeft: `4px solid ${card.color}`, cursor: 'pointer' }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                   <span style={{ fontSize: 22 }}>{card.icon}</span>

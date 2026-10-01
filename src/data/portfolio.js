@@ -13,10 +13,10 @@
 
 // Colours drawn from the palette already used across the app (Wealth Hub / header).
 export const ASSET_CLASSES = {
-  Crypto:        { color: '#D4A853', icon: '₿' },
-  Stocks:        { color: '#6ABFA0', icon: '📈' },
-  'Mutual Fund': { color: '#5B9ED6', icon: '🧺' },
-  'Fixed Deposit': { color: '#568F7C', icon: '🏦' },
+  Crypto:        { color: '#F5B83D', icon: '₿' },
+  Stocks:        { color: '#4ADE9B', icon: '📈' },
+  'Mutual Fund': { color: '#6AA6FF', icon: '🧺' },
+  'Fixed Deposit': { color: '#45D9B8', icon: '🏦' },
 }
 
 // Illustrative historical-average annual returns, used only by the

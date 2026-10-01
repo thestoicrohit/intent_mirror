@@ -139,7 +139,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
   const input = { width: '100%', background: c.inputBg, border: `1px solid ${c.border}`, borderRadius: 10, padding: '13px 14px', color: c.text, fontSize: 15, outline: 'none' }
   const primary = {
     width: '100%', background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`, border: 'none', borderRadius: 10,
-    padding: '14px 20px', color: '#fff', fontSize: 14.5, fontWeight: 700, cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.7 : 1,
+    padding: '14px 20px', color: c.onAccent, fontSize: 14.5, fontWeight: 700, cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.7 : 1,
   }
   const link = { background: 'none', border: 'none', color: c.accent, fontWeight: 700, cursor: 'pointer', fontSize: 13, padding: 0 }
   const h1 = { fontSize: 26, fontWeight: 800, lineHeight: 1.2, margin: '0 0 6px' }
@@ -175,7 +175,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
 
       <div style={{ width: '100%', maxWidth: 420, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 26 }}>
-          <div style={{ width: 42, height: 42, borderRadius: 11, background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#fff', fontWeight: 800 }}>⬡</div>
+          <div style={{ width: 42, height: 42, borderRadius: 11, background: `linear-gradient(135deg, ${c.accent} 0%, ${c.accent2} 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: c.onAccent, fontWeight: 800 }}>⬡</div>
           <div>
             <div style={{ fontSize: 20, fontWeight: 800 }}>Intent Mirror</div>
             <div style={{ fontSize: 11, color: c.textDim, letterSpacing: 1, textTransform: 'uppercase' }}>Your money, your mirror</div>
@@ -192,7 +192,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
               <label style={label} htmlFor="em">Email</label>
               <input id="em" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" autoComplete="email" autoFocus style={input} />
             </div>
-            <button type="submit" style={primary}>Continue →</button>
+            <button type="submit" className="glow-btn" style={primary}>Continue →</button>
             {msgs}
             <div style={{ fontSize: 12, color: c.textDim, textAlign: 'center' }}>You can keep exploring without an account anytime.</div>
           </form>
@@ -202,7 +202,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
           <form onSubmit={onLogin} noValidate style={{ display: 'grid', gap: 14 }}>
             <div>{emailChip}<h1 style={h1}>Welcome back 👋</h1><p style={sub}>Enter your password to continue.</p></div>
             {pwInput(pw, e => setPw(e.target.value), 'Your password', 'pw')}
-            <button type="submit" disabled={busy} style={primary}>{busy ? 'Checking…' : 'Log in →'}</button>
+            <button type="submit" disabled={busy} className="glow-btn" style={primary}>{busy ? 'Checking…' : 'Log in →'}</button>
             {msgs}
             <button type="button" onClick={sendReset} style={{ ...link, textAlign: 'center' }}>Forgot password?</button>
           </form>
@@ -225,7 +225,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
                 </div>
               )}
             </div>
-            <button type="submit" disabled={busy} style={primary}>{busy ? 'Creating…' : 'Create account →'}</button>
+            <button type="submit" disabled={busy} className="glow-btn" style={primary}>{busy ? 'Creating…' : 'Create account →'}</button>
             {msgs}
             <div style={{ fontSize: 11.5, color: c.textDim, textAlign: 'center', lineHeight: 1.5 }}>By continuing you agree to the Terms & Privacy Policy. Demo app — not financial advice.</div>
           </form>
@@ -242,7 +242,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
               <button type="button" onClick={() => setOtp(demoCode)} style={{ ...link, border: `1px solid ${c.border}`, borderRadius: 8, padding: '6px 10px', fontSize: 12 }}>Autofill</button>
             </div>
             <OtpBoxes key={demoCode} value={otp} onChange={setOtp} c={c} disabled={busy} />
-            <button type="submit" style={primary}>Verify →</button>
+            <button type="submit" className="glow-btn" style={primary}>Verify →</button>
             {msgs}
             <button type="button" onClick={sendReset} style={{ ...link, textAlign: 'center' }}>Send a new code</button>
           </form>
@@ -252,7 +252,7 @@ export default function Onboarding({ onComplete, c, isDark, onToggleTheme, initi
           <form onSubmit={onNewPass} noValidate style={{ display: 'grid', gap: 14 }}>
             <div><h1 style={h1}>New password</h1><p style={sub}>Choose one you'll remember.</p></div>
             {pwInput(pw, e => setPw(e.target.value), 'At least 8 characters', 'pw')}
-            <button type="submit" disabled={busy} style={primary}>{busy ? 'Saving…' : 'Save & log in →'}</button>
+            <button type="submit" disabled={busy} className="glow-btn" style={primary}>{busy ? 'Saving…' : 'Save & log in →'}</button>
             {msgs}
           </form>
         )}
